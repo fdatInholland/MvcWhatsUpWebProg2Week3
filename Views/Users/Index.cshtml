@@ -1,0 +1,41 @@
+﻿@model IEnumerable<MvcWhatsUp.Models.User>
+
+@{
+    
+    ViewData["Title"] = "Users";
+    User? loggedInUser = (User?)ViewData["LoggedInUser"];
+
+}
+
+<div class="text-center">
+    <h1 class="display-4">Users</h1>
+</div>
+
+<p>@TempData["ConfirmationMessage"]</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Mobile number</th>
+            <th>Email Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            foreach (User user in Model)
+            {
+                var rowStyle = "";
+                @if(user.UserID == loggedInUser.UserID)
+                {
+                    rowStyle = "class=table-info"; 
+                }
+                <tr @rowStyle>
+                    <td>@user.UserName</td>
+                    <td>@user.MobileNumber</td>
+                    <td>@user.EmailAddress</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
