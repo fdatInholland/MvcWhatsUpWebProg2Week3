@@ -21,7 +21,7 @@ namespace MvcWhatsUp.Repositories
             //below code must be re-factored to a seperate private method
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                string query = "Select UserID, UserName,  MobileNumber, EmailAddress from Users";
+                string query = "Select UserID, UserName,  MobileNumber, EmailAddress, Role from Users";
                 SqlCommand command = new SqlCommand(query, connection);
                 try
                 {
@@ -35,7 +35,10 @@ namespace MvcWhatsUp.Repositories
                                 UserID = Convert.ToInt32(reader["UserID"]),
                                 UserName = reader["UserName"].ToString(),
                                 MobileNumber = reader["MobileNumber"].ToString(),
-                                EmailAddress = reader["EmailAddress"].ToString()
+                                EmailAddress = reader["EmailAddress"].ToString(),
+                                Role = Enum.TryParse<UserRoles>(reader["Role"]?.ToString(), out var parsedRole)
+                                        ? parsedRole
+                                        : UserRoles.Member,
                             });
                         }
                     }
@@ -55,7 +58,7 @@ namespace MvcWhatsUp.Repositories
 
         User? IUsersRepository.GetUserByID(int userId)
         {
-            string query = "SELECT UserID, UserName, MobileNumber, EmailAddress, Password FROM Users WHERE UserID = @UserID";
+            string query = "SELECT UserID, UserName, MobileNumber, EmailAddress, Password, Role FROM Users WHERE UserID = @UserID";
 
             SqlParameter[] sqlParameters = new SqlParameter[]
             {
@@ -69,15 +72,16 @@ namespace MvcWhatsUp.Repositories
         {
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                string query = "INSERT INTO Users (UserName, MobileNumber, EmailAddress, Password) " +
-                               "VALUES (@UserName, @MobileNumber, @EmailAddress, @Password);" + "SELECT SCOPE_IDENTITY()";
+                string query = "INSERT INTO Users (UserName, MobileNumber, EmailAddress, Password, Role) " +
+                               "VALUES (@UserName, @MobileNumber, @EmailAddress, @Password, @Role);" + "SELECT SCOPE_IDENTITY()";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@UserName", user.UserName);
                     command.Parameters.AddWithValue("@MobileNumber", user.MobileNumber);
                     command.Parameters.AddWithValue("@EmailAddress", user.EmailAddress);
-                    command.Parameters.AddWithValue("@Password", user.Password); 
+                    command.Parameters.AddWithValue("@Password", user.Password);
+                    command.Parameters.AddWithValue("@Role", user.Role);
 
                     try
                     {
@@ -106,13 +110,14 @@ namespace MvcWhatsUp.Repositories
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 string query = "UPDATE Users SET UserName = @Name, MobileNumber = @MobileNumber, " +
-                               "EmailAddress = @EmailAddress WHERE UserId = @Id";
+                               "EmailAddress = @EmailAddress, Role = @Role WHERE UserId = @Id";
 
                 SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue("@Id", user.UserID);
                 command.Parameters.AddWithValue("@Name", user.UserName);
                 command.Parameters.AddWithValue("@MobileNumber", user.MobileNumber);
                 command.Parameters.AddWithValue("@EmailAddress", user.EmailAddress);
+                command.Parameters.AddWithValue("@Role", user.Role);
 
                 command.Connection.Open();
                 int nrOfRowsAffected = command.ExecuteNonQuery();
@@ -163,7 +168,10 @@ namespace MvcWhatsUp.Repositories
                                     UserName = reader["UserName"].ToString(),
                                     MobileNumber = reader["MobileNumber"].ToString(),
                                     EmailAddress = reader["EmailAddress"].ToString(),
-                                    Password = reader["Password"].ToString()
+                                    Password = reader["Password"].ToString(),
+                                    Role = Enum.TryParse<UserRoles>(reader["Role"]?.ToString(), out var parsedRole)
+                                        ? parsedRole
+                                        : UserRoles.Member,
                                 };
                             }
                         }
@@ -180,7 +188,7 @@ namespace MvcWhatsUp.Repositories
 
         User? IUsersRepository.GetUserByLoginCredentials(string Username, string Password)
         {
-            string query = "SELECT UserID, UserName, MobileNumber, EmailAddress, Password FROM Users WHERE CAST(UserName AS NVARCHAR(MAX)) = @USERNAME and Password = @PASSWORD";
+            string query = "SELECT UserID, UserName, MobileNumber, EmailAddress, Password, Role FROM Users WHERE CAST(UserName AS NVARCHAR(MAX)) = @USERNAME and Password = @PASSWORD";
 
             SqlParameter[] sqlParameters = new SqlParameter[]
                 {

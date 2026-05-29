@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MvcWhatsUp.Exceptions;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MvcWhatsUp.Models;
 using MvcWhatsUp.Models.Extensions;
 using MvcWhatsUp.Models.VM;
@@ -7,6 +7,7 @@ using MvcWhatsUp.Repositories.Interfaces;
 
 namespace MvcWhatsUp.Controllers
 {
+    [Authorize]
     public class ChatsController : Controller
     {
         private readonly IUsersRepository _usersRepository;

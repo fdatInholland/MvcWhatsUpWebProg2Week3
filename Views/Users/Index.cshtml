@@ -1,10 +1,9 @@
 ﻿@model IEnumerable<MvcWhatsUp.Models.User>
+@using System.Security.Claims
 
 @{
-    
     ViewData["Title"] = "Users";
     User? loggedInUser = (User?)ViewData["LoggedInUser"];
-
 }
 
 <div class="text-center">
@@ -13,27 +12,42 @@
 
 <p>@TempData["ConfirmationMessage"]</p>
 
+<h5>All User Claims:</h5>
+
+<ul>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+
+        foreach (Claim claim in User.Claims)
+        {
+            <li>
+                <strong>@claim.Type:</strong> @claim.Value
+            </li>
+        }
+    }
+    else
+    {
+        <li>No active session / claims found.</li>
+    }
+</ul>
 <table class="table">
     <thead>
         <tr>
             <th>Name</th>
             <th>Mobile number</th>
             <th>Email Address</th>
+            <th>Role</th>
         </tr>
     </thead>
     <tbody>
         @{
             foreach (User user in Model)
             {
-                var rowStyle = "";
-                @if(user.UserID == loggedInUser.UserID)
-                {
-                    rowStyle = "class=table-info"; 
-                }
-                <tr @rowStyle>
+                <tr>
                     <td>@user.UserName</td>
                     <td>@user.MobileNumber</td>
                     <td>@user.EmailAddress</td>
+                    <td>@user.Role</td>
                 </tr>
             }
         }

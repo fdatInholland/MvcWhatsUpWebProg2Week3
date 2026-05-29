@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MvcWhatsUp.Models;
 using MvcWhatsUp.Models.Extensions;
-using MvcWhatsUp.Repositories.Interfaces;
 using MvcWhatsUp.Services.Interfaces;
 
 namespace MvcWhatsUp.Controllers
@@ -12,31 +11,7 @@ namespace MvcWhatsUp.Controllers
 
         public UsersController(IUsersService usersService)
         {
-             _usersService = usersService;
-        }
-
-        [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult Login(LoginModel loginModel)
-        {
-            User? user = _usersService.GetByLoginCredentials(loginModel.Username, loginModel.Password);
-
-            if (user is null)
-            {
-                ViewBag.ErrorMessage = "Bad username/password combination";
-
-                return View(loginModel);
-            }
-            else
-            {
-                HttpContext.Session.SetObject("LoggedInUser", user);
-                return RedirectToAction("Index", "Users");
-            }
+            _usersService = usersService;
         }
 
         [HttpGet]
@@ -73,6 +48,7 @@ namespace MvcWhatsUp.Controllers
 
         //Get user
         [HttpGet]
+        //[Authorize(Roles="Admin")]
         public IActionResult Delete(int? id)
         {
             if (id is null)
@@ -87,6 +63,7 @@ namespace MvcWhatsUp.Controllers
             }
         }
 
+        // [Authorize(roles="")]
         public IActionResult Delete(User user)
         {
             try
@@ -149,7 +126,7 @@ namespace MvcWhatsUp.Controllers
 
             TempData["ConfirmationMessage"] = "This is some confirmation data";
             return RedirectToAction("Index", "Users");
-            
+
             //return View();
         }
     }

@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using MvcWhatsUp.Controllers;
 using MvcWhatsUp.Repositories;
 using MvcWhatsUp.Repositories.Interfaces;
 using MvcWhatsUp.Services;
@@ -12,6 +14,13 @@ namespace MvcWhatsUp
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddAuthentication(
+                CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.AccessDeniedPath = "/Account/";
+                });
 
             builder.Services.AddSession(options =>
             {
@@ -40,13 +49,16 @@ namespace MvcWhatsUp
 
             app.UseSession();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.UseRouting();
 
             app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Users}/{action=Login}/{id?}");
+                pattern: "{controller=Account}/{action=Login}/{id?}");
 
             app.Run();
         }
